@@ -45,7 +45,7 @@ class Memories:
         return None
 
     def get_memory(self, index):
-        return self.ist[index]
+        return self.list[index]
 
     def insert_memory(self, memory_str: str, capacity, wcet_scale, power_active, power_idle) -> bool:
         if memory_str.lower() == "lpm":

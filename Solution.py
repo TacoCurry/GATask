@@ -95,7 +95,7 @@ class Solution:
             temp += fitness_list[i]
             if point < temp:
                 break
-        return solutions.pop(i)
+        return solutions[i]
 
     @staticmethod
     def select_solution_using_roulette_wheel(solutions):
@@ -127,7 +127,7 @@ class Solution:
         n = len(solutions)
         fitness_list = []
         sum_fitness = 0
-        for i in range(1, len(solutions)+1):
+        for i in range(1, len(solutions) + 1):
             fitness = MAX + (i - 1) * diff / (n - 1)
             sum_fitness += fitness
             fitness_list.append(fitness)
@@ -139,12 +139,40 @@ class Solution:
     def crossover(solution1, solution2):
         n_task = Solution.tasks.n_task
 
-        for i in range(Solution.TRY_LIMIT):
-            crossover_point_processor = random.randint(0, n_task)
-            crossover_point_memory = random.randint(0, n_task)
+        crossover_point_processor = random.randint(0, n_task)
+        crossover_point_memory = random.randint(0, n_task)
+
+        new_solution = Solution()
+        new_solution.genes_processor = solution1.genes_processor[:crossover_point_processor] + \
+                                       solution2.genes_processor[crossover_point_processor:]
+        new_solution.genes_memory = solution1.genes_memory[:crossover_point_memory] + \
+                                    solution2.genes_memory[crossover_point_memory:]
+        return new_solution
 
     def mutation(self):
-        pass
+        MUTATION_PROB = 0.001  # 0.1% 확률로 exchange mutation 발생
 
+        if random.random() > MUTATION_PROB:
+            return  # 돌연변이 발생 안함.
 
+        n_task = Solution.tasks.n_task
+
+        # processor
+        point1 = random.randint(0, n_task - 1)
+        point2 = random.randint(0, n_task - 1)
+        temp = self.genes_processor[point1]
+        self.genes_processor[point1] = self.genes_processor[point2]
+        self.genes_processor[point2] = temp
+
+        # memory
+        point1 = random.randint(0, n_task - 1)
+        point2 = random.randint(0, n_task - 1)
+        temp = self.genes_memory[point1]
+        self.genes_memory[point1] = self.genes_memory[point2]
+        self.genes_memory[point2] = temp
+
+    def is_schedule(self):
+        if self.utilization <= Solution.processor.n_core:
+            return True
+        return False
 

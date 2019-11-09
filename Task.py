@@ -1,5 +1,5 @@
 class Task:
-    def __init__(self, wcet, period, mem_req, mem_active_ratio, read_ratio):
+    def __init__(self, wcet, period, mem_req, mem_active_ratio, read_ratio=0.5):
         self.wcet = wcet
         self.period = period
         self.mem_req = mem_req
