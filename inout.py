@@ -68,3 +68,37 @@ class InputUtils:
             sys.exit(0)
 
 
+class OutputUtils:
+    @staticmethod
+    def result_print(solution, file="result.txt"):
+        with open(file, "w+", encoding='UTF8') as f:
+            for i in range(solution.tasks.n_task):
+                f.write(str(solution.genes_processor[i]) + " " + str(solution.genes_memory[i]) + "\n")
+            f.write("# processor_mode memory_type")
+        return True
+
+    @staticmethod
+    def report_print(n_generation, solutions):
+        power_min = power_max = power_sum = solutions[0].power
+        util_min = util_max = util_sum = solutions[0].utilization
+
+        for solution in solutions[1:]:
+            power_sum += solution.power
+            util_sum += solution.utilization
+
+            if solution.power > power_max:
+                power_max = solution.power
+            elif solution.power < power_min:
+                power_min = solution.power
+
+            if solution.utilization > util_max:
+                util_max = solution.utilization
+            elif solution.utilization < util_min:
+                util_min = solution.utilization
+
+        power_avg = power_sum / len(solutions)
+        util_avg = util_sum / len(solutions)
+
+        print("generation: {}, power_min: {}, power_max: {}, power_avg: {}, util_min: {}, util_max: {}, util_avg: {}"
+              .format(n_generation, round(power_min, 5), round(power_max, 5), round(power_avg, 5),
+                      round(util_min, 5), round(util_max, 5), round(util_avg, 5)))
