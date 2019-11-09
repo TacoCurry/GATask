@@ -7,7 +7,7 @@ class Solution:
     tasks = None
     TRY_LIMIT = 10000
     UTIL_LIMIT_RATIO = None
-    PENALTY_RATIO = 0.3
+    PENALTY_RATIO = 0.5
 
     def __init__(self):
         self.genes_processor = []
@@ -18,7 +18,7 @@ class Solution:
 
     def __lt__(self, other):
         # Sort by score
-        return self.score - other.score
+        return self.score < other.score
 
     def is_valid(self):
         # util, power, score 계산한 후, util 이 UTIL_LIMIT_RATIO 이하일 때만 true 반환하는 메서드
@@ -77,6 +77,9 @@ class Solution:
 
         for i in range(Solution.TRY_LIMIT):
             # Make random genes
+            solution.genes_processor = []
+            solution.genes_memory = []
+
             for j in range(Solution.tasks.n_task):
                 solution.genes_processor.append(random.randint(0, Solution.processor.n_mode - 1))
                 solution.genes_memory.append(random.randint(0, Solution.memories.n_mem_types - 1))
@@ -95,7 +98,7 @@ class Solution:
             temp += fitness_list[i]
             if point < temp:
                 break
-        return solutions[i]
+        return i, solutions.pop(i)
 
     @staticmethod
     def select_solution_using_roulette_wheel(solutions):
