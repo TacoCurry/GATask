@@ -12,16 +12,70 @@ class Solution:
     def __init__(self):
         self.genes_processor = []
         self.genes_memory = []
+
+        # For memory balance
+        self.n_tasks_for_each_memory = None
+        self.used_capacity_for_each_memory = None
+        self.memory_with_most_tasks = None
+
         self.utilization = None
         self.power = None
         self.score = None
 
     def __lt__(self, other):
-        # Sort by score
+        # Sort in descending order of scores
         return self.score < other.score
 
-    def is_valid(self):
-        # util, power, score 계산한 후, util 이 UTIL_LIMIT_RATIO 이하일 때만 true 반환하는 메서드
+    def is_schedule(self):
+        if self.utilization <= Solution.processor.n_core:
+            return True
+        return False
+
+    """
+    ------------------------------------------------------------------------------
+    Memory
+    """
+
+    def calc_memory_info(self):
+        # Calculate memory usages for each task
+        self.n_tasks_for_each_memory = [0 for i in range(Solution.memories.n_mem_types)]
+        self.used_capacity_for_each_memory = [0 for i in range(Solution.memories.n_mem_types)]
+
+        for i in range(len(self.tasks)):
+            task = self.tasks[i]
+            task_mem_type = self.genes_memory[i]
+            self.n_tasks_for_each_memory[task_mem_type] += 1
+            self.used_capacity_for_each_memory[task_mem_type] += task.mem_req
+
+        # Find a memory with the most tasks
+        max_n_tasks = self.n_tasks_for_each_memory[0]
+        max_index = 0
+        for i in range(1, len(Solution.memories.n_mem_types)):
+            if self.n_tasks_for_each_memory[i] > max_n_tasks:
+                max_n_tasks = self.n_tasks_for_each_memory[i]
+                max_index = i
+        self.memory_with_most_tasks = max_index
+
+    def check_memory(self):
+        # Check memory capacity for each memory
+        for i in range(Solution.memories.n_mem_types):
+            if self.used_capacity_for_each_memory[i] > Solution.memories.get_memory(i).capacity:
+                return False
+        return True
+
+    def adjust_memory(self):
+        # adjust balance
+
+
+        pass
+
+    """
+    --------------------------------------------------------------
+    Process
+    """
+
+    def check_utilization(self):
+        # Check utilization using UTIL_LIMIT_RATIO
         util_sum = 0
         power_sum = 0
 
@@ -67,6 +121,14 @@ class Solution:
             self.score += power_sum * (util_sum - n_core) * Solution.PENALTY_RATIO
         return True
 
+    def adjust_utilization(self):
+        pass
+
+    """
+    ----------------------------------------------------------
+    For making initial solution set in GA
+    """
+
     @staticmethod
     def set_random_seed():
         random.seed()  # Set seed using current time
@@ -75,20 +137,30 @@ class Solution:
     def get_random_solution():
         solution = Solution()
 
+        # Set random attributes
+        solution.genes_processor = []
+        solution.genes_memory = []
+        for j in range(Solution.tasks.n_task):
+            solution.genes_processor.append(random.randint(0, Solution.processor.n_mode - 1))
+            solution.genes_memory.append(random.randint(0, Solution.memories.n_mem_types - 1))
+
+        # Try making valid solution
+        solution.calc_memory_info()
         for i in range(Solution.TRY_LIMIT):
-            # Make random genes
-            solution.genes_processor = []
-            solution.genes_memory = []
-
-            for j in range(Solution.tasks.n_task):
-                solution.genes_processor.append(random.randint(0, Solution.processor.n_mode - 1))
-                solution.genes_memory.append(random.randint(0, Solution.memories.n_mem_types - 1))
-
-            if solution.is_valid():
+            if not solution.check_memory():
+                solution.adjust_memory()
+                continue
+            if solution.check_utilization():
                 return solution
+            solution.adjust_utilization()
 
-        # 생성을 반복해도 UTIL_LIMIT_RATIO 이하의 solution 을 만들지 못할 경우
+        # 생성을 반복해도 valid한 solution 을 만들지 못할 경우
         raise Exception("random solution 생성 불가")
+
+    """
+    ----------------------------------------------------------
+    For Crossover in GA
+    """
 
     @staticmethod
     def select_solution(sum_fitness, fitness_list, solutions):
@@ -102,8 +174,7 @@ class Solution:
 
     @staticmethod
     def select_solution_using_roulette_wheel(solutions):
-        # 1. fitness 구하기
-        # fi = (Cw - Ci) + ( Cw - Cb ) / (k - 1) 식을 이용
+        # 1. Calculate fitness using formula "fi = (Cw - Ci) + ( Cw - Cb ) / (k - 1)"
         K = 4
 
         worst_score = solutions[-1].score
@@ -117,7 +188,6 @@ class Solution:
             sum_fitness += fitness
             fitness_list.append(fitness)
 
-        # 2. 선택하기
         return Solution.select_solution(sum_fitness, fitness_list, solutions)
 
     @staticmethod
@@ -156,7 +226,7 @@ class Solution:
         MUTATION_PROB = 0.001  # 0.1% 확률로 exchange mutation 발생
 
         if random.random() > MUTATION_PROB:
-            return  # 돌연변이 발생 안함.
+            return
 
         n_task = Solution.tasks.n_task
 
@@ -173,9 +243,3 @@ class Solution:
         temp = self.genes_memory[point1]
         self.genes_memory[point1] = self.genes_memory[point2]
         self.genes_memory[point2] = temp
-
-    def is_schedule(self):
-        if self.utilization <= Solution.processor.n_core:
-            return True
-        return False
-

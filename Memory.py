@@ -9,7 +9,6 @@ class Memory:
         self.wcet_scale = wcet_scale
         self.power_active = power_active
         self.power_idle = power_idle
-        self.used_capacity = 0
 
     def get_type_str(self) -> str:
         if self.type == Memory.TYPE_DRAM:
