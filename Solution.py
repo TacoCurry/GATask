@@ -36,25 +36,24 @@ class Solution:
     Memory
     """
 
-    def calc_memory_info(self):
-        # Calculate memory usages for each task
-        self.n_tasks_for_each_memory = [0 for i in range(Solution.memories.n_mem_types)]
-        self.used_capacity_for_each_memory = [0 for i in range(Solution.memories.n_mem_types)]
-
-        for i in range(len(self.tasks)):
-            task = self.tasks[i]
-            task_mem_type = self.genes_memory[i]
-            self.n_tasks_for_each_memory[task_mem_type] += 1
-            self.used_capacity_for_each_memory[task_mem_type] += task.mem_req
-
+    def calc_memory_with_most_tasks(self):
         # Find a memory with the most tasks
         max_n_tasks = self.n_tasks_for_each_memory[0]
         max_index = 0
-        for i in range(1, len(Solution.memories.n_mem_types)):
+        for i in range(1, Solution.memories.n_mem_types):
             if self.n_tasks_for_each_memory[i] > max_n_tasks:
                 max_n_tasks = self.n_tasks_for_each_memory[i]
                 max_index = i
         self.memory_with_most_tasks = max_index
+
+    def calc_memory_used(self):
+        # Calculate memory usages for each task
+        self.n_tasks_for_each_memory = [0 for i in range(Solution.memories.n_mem_types)]
+        self.used_capacity_for_each_memory = [0 for i in range(Solution.memories.n_mem_types)]
+
+        for i in range(self.tasks.n_task):
+            self.n_tasks_for_each_memory[self.genes_memory[i]] += 1
+            self.used_capacity_for_each_memory[self.genes_memory[i]] += self.tasks.get_task(i).mem_req
 
     def check_memory(self):
         # Check memory capacity for each memory
@@ -64,14 +63,32 @@ class Solution:
         return True
 
     def adjust_memory(self):
-        # adjust balance
+        # Balance memory by moving a task placed in the most frequent memory to another memory.
+        replace_index = random.randint(0, self.n_tasks_for_each_memory[self.memory_with_most_tasks]-1)
+        while True:
+            new_mem_type = random.randint(0, Solution.memories.n_mem_types - 1)
+            if new_mem_type != self.memory_with_most_tasks:
+                break
 
+        for i in range(len(self.genes_memory)):
+            if self.genes_memory[i] == self.memory_with_most_tasks:
+                if replace_index == 0:
+                    # Replace (replace_index)-th task of most frequent memory into new_mem_type
+                    self.genes_memory[i] = new_mem_type
 
-        pass
+                    self.n_tasks_for_each_memory[self.memory_with_most_tasks] -= 1
+                    self.used_capacity_for_each_memory[self.memory_with_most_tasks] -= self.tasks.get_task(i).mem_req
+
+                    self.n_tasks_for_each_memory[new_mem_type] += 1
+                    self.used_capacity_for_each_memory[new_mem_type] += self.tasks.get_task(i).mem_req
+
+                    self.calc_memory_with_most_tasks()
+                    break
+                replace_index -= 1
 
     """
     --------------------------------------------------------------
-    Process
+    Utilization and power
     """
 
     def check_utilization(self):
@@ -122,7 +139,51 @@ class Solution:
         return True
 
     def adjust_utilization(self):
-        pass
+        if random.random()*(Solution.processor.n_mode + Solution.memories.n_mem_types) < Solution.processor.n_mode:
+            if not self.adjust_utilization_by_processor():
+                if not self.adjust_utilization_by_memory():
+                    return False
+        else:
+            if not self.adjust_utilization_by_memory():
+                if not self.adjust_utilization_by_processor():
+                    return False
+        return True
+
+    def adjust_utilization_by_memory(self):
+        # Move a random task in LPM to DRAM
+        index_end = index = random.randint(0, Solution.tasks.n_task-1)
+
+        while True:
+            index = (index + 1) % Solution.tasks.n_task
+            if self.genes_memory[index] > 0:
+                # Remove a task from LPM
+                self.n_tasks_for_each_memory[self.genes_memory[index]] -= 1
+                self.used_capacity_for_each_memory[self.genes_memory[index]] -= self.tasks.get_task(index).mem_req
+                # Add a task to DRAM
+                self.genes_memory[index] -= 1
+                self.n_tasks_for_each_memory[self.genes_memory[index]] += 1
+                self.used_capacity_for_each_memory[self.genes_memory[index]] += self.tasks.get_task(index).mem_req
+                # Update memory with most tasks
+                self.calc_memory_with_most_tasks()
+                return True
+
+            if index == index_end:
+                break
+
+        return False
+
+    def adjust_utilization_by_processor(self):
+        # Change a random task to higher processor voltage/frequency mode
+        index_end = index = random.randint(0, Solution.tasks.n_task - 1)
+
+        while True:
+            index = (index + 1) % Solution.tasks.n_task
+            if self.genes_processor[index] > 0:
+                self.genes_processor[index] -= 1
+                return True
+            if index == index_end:
+                break
+        return False
 
     """
     ----------------------------------------------------------
@@ -145,14 +206,16 @@ class Solution:
             solution.genes_memory.append(random.randint(0, Solution.memories.n_mem_types - 1))
 
         # Try making valid solution
-        solution.calc_memory_info()
+        solution.calc_memory_used()
+        solution.calc_memory_with_most_tasks()
         for i in range(Solution.TRY_LIMIT):
             if not solution.check_memory():
                 solution.adjust_memory()
                 continue
             if solution.check_utilization():
                 return solution
-            solution.adjust_utilization()
+            if not solution.adjust_utilization():
+                raise Exception("random solution 생성 불가")
 
         # 생성을 반복해도 valid한 solution 을 만들지 못할 경우
         raise Exception("random solution 생성 불가")

@@ -35,6 +35,8 @@ def run():
             new_solution.mutation()
 
             # 4. Check Validity
+            new_solution.calc_memory_used()
+            new_solution.calc_memory_with_most_tasks()
             if new_solution.check_memory() and new_solution.check_utilization():
                 get_new_solution = True
                 break
