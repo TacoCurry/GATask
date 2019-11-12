@@ -22,7 +22,7 @@ def run():
         if i != 0 and i % 100 == 0:
             OutputUtils.report_print(i, solutions)
 
-        is_valid = False
+        get_new_solution = False
         for j in range(Solution.TRY_LIMIT):
             # 2. Select two solution
             solution1_index, solution1 = Solution.select_solution_using_roulette_wheel(solutions)
@@ -35,17 +35,19 @@ def run():
             new_solution.mutation()
 
             # 4. Check Validity
-            if new_solution.is_valid():
-                is_valid = True
-                # Replace solution
-                solutions[-1] = new_solution
-                solutions.sort()
+            new_solution.calc_memory_used()
+            new_solution.calc_memory_with_most_tasks()
+            if new_solution.check_memory() and new_solution.check_utilization():
+                get_new_solution = True
                 break
 
-        if is_valid:
+        if get_new_solution:
+            # Replace worst solution into new solution
+            solutions[-1] = new_solution
+            solutions.sort()
             continue
         else:
-            raise Exception("solution 교배 불가")
+            raise Exception("{}번째 generation 이후, solution 교배 불가".format(i+1))
 
     # 5. Print result
     for solution in solutions:
