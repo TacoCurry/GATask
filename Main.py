@@ -7,18 +7,14 @@ def run():
     Solution.memories = InputUtils.get_memories()
     Solution.processor = InputUtils.get_processor()
     Solution.tasks = InputUtils.get_tasks()
-
-    # for GA
-    max_generations = int(input("Max Generations: "))
-    population = int(input("Population: "))
-    Solution.UTIL_LIMIT_RATIO = float(input("Util Limit Ratio(0.0 ~ 1.0): "))
+    InputUtils.get_other_input()
 
     # 1. Make initial solution set
     Solution.set_random_seed()
-    solutions = [Solution.get_random_solution() for i in range(population)]
+    solutions = [Solution.get_random_solution() for i in range(Solution.POPULATIONS)]
     solutions.sort()  # Sort solutions by score
 
-    for i in range(max_generations):
+    for i in range(Solution.MAX_GENERATIONS):
         if i != 0 and i % 100 == 0:
             OutputUtils.report_print(i, solutions)
 

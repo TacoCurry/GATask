@@ -5,9 +5,17 @@ class Solution:
     processor = None
     memories = None
     tasks = None
-    TRY_LIMIT = 10000
+
+    # Constants
+    MAX_GENERATIONS = None
+    POPULATIONS = None
+    TRY_LIMIT = None
     UTIL_LIMIT_RATIO = None
-    PENALTY_RATIO = 0.5
+    PENALTY_RATIO = None
+    MUTATION_PROB = None
+    K_ROULETTE_WHEEL_SELECTION = None  # for Roulette-wheel selection
+    MAX_RANKING_SELECTION = None  # for Ranking selection
+    MIN_RANKING_SELECTION = None
 
     def __init__(self):
         self.genes_processor = []
@@ -238,11 +246,9 @@ class Solution:
     @staticmethod
     def select_solution_using_roulette_wheel(solutions):
         # 1. Calculate fitness using formula "fi = (Cw - Ci) + ( Cw - Cb ) / (k - 1)"
-        K = 4
-
         worst_score = solutions[-1].score
         best_score = solutions[0].score
-        constant = (worst_score - best_score) / (K - 1)
+        constant = (worst_score - best_score) / (Solution.K_ROULETTE_WHEEL_SELECTION - 1)
 
         fitness_list = []
         sum_fitness = 0
@@ -256,15 +262,12 @@ class Solution:
     @staticmethod
     def select_solution_using_ranking_selection(solutions):
         # Calculate fitness using Ranking Selection
-        MAX = 100
-        MIN = 0
-
-        diff = MIN - MAX
+        diff = Solution.MIN_RANKING_SELECTION - Solution.MAX_RANKING_SELECTION
         n = len(solutions)
         fitness_list = []
         sum_fitness = 0
         for i in range(1, len(solutions) + 1):
-            fitness = MAX + (i - 1) * diff / (n - 1)
+            fitness = Solution.MAX_RANKING_SELECTION + (i - 1) * diff / (n - 1)
             sum_fitness += fitness
             fitness_list.append(fitness)
 
@@ -286,9 +289,7 @@ class Solution:
         return new_solution
 
     def mutation(self):
-        MUTATION_PROB = 0.001  # 0.1% 확률로 exchange mutation 발생
-
-        if random.random() > MUTATION_PROB:
+        if random.random() > Solution.MUTATION_PROB:
             return
 
         n_task = Solution.tasks.n_task
