@@ -2,6 +2,7 @@ from Task import Tasks, Task
 import sys
 from Processor import Processor
 from Memory import Memories
+from Solution import Solution
 
 
 class InputUtils:
@@ -60,6 +61,26 @@ class InputUtils:
                     task_info = f.readline().split()
                     tasks.insert_task(Task(int(task_info[0]), int(task_info[1]), float(task_info[2]), float(task_info[3])))
             return tasks
+        except FileNotFoundError:
+            print("%s이 존재하는지 확인하세요".format(file))
+            sys.exit(0)
+        except IndexError:
+            print("%s의 형식이 올바른지 확인하세요".format(file))
+            sys.exit(0)
+
+    @staticmethod
+    def get_other_input(file="input_other.txt"):
+        try:
+            with open(file, "r", encoding='UTF8') as f:
+                Solution.MAX_GENERATIONS = int(f.readline())
+                Solution.POPULATIONS = int(f.readline())
+                Solution.TRY_LIMIT = int(f.readline())
+                Solution.UTIL_LIMIT_RATIO = float(f.readline())
+                Solution.PENALTY_RATIO = float(f.readline())
+                Solution.MUTATION_PROB = float(f.readline())
+                Solution.K_ROULETTE_WHEEL_SELECTION = int(f.readline())
+                temp = f.readline().split()
+                Solution.MAX_RANKING_SELECTION, Solution.MIN_RANKING_SELECTION = int(temp[0]), int(temp[1])
         except FileNotFoundError:
             print("%s이 존재하는지 확인하세요".format(file))
             sys.exit(0)
