@@ -17,7 +17,8 @@ class InputUtils:
                 # get memories
                 for i in range(n_memories):
                     mem_info = f.readline().split()
-                    memories.insert_memory(mem_info[0], int(mem_info[1]), float(mem_info[2]), float(mem_info[3]), float(mem_info[4]))
+                    memories.insert_memory(mem_info[0], int(mem_info[1]), float(mem_info[2]), float(mem_info[3]),
+                                           float(mem_info[4]))
 
             return memories
         except FileNotFoundError:
@@ -59,7 +60,8 @@ class InputUtils:
                 n_tasks = int(f.readline())
                 for i in range(n_tasks):
                     task_info = f.readline().split()
-                    tasks.insert_task(Task(int(task_info[0]), int(task_info[1]), float(task_info[2]), float(task_info[3])))
+                    tasks.insert_task(
+                        Task(int(task_info[0]), int(task_info[1]), float(task_info[2]), float(task_info[3])))
             return tasks
         except FileNotFoundError:
             print("{}이 존재하는지 확인하세요".format(file))
@@ -128,6 +130,6 @@ class OutputUtils:
         with open(file, "a", encoding='UTF8') as f:
             f.write("generation: {}, power_min: {}, power_avg: {}, power_max: {}, "
                     "util_min: {}, util_avg: {}, util_max: {}\n".format(n_generation, round(power_min, 5),
-                                                                      round(power_avg, 5), round(power_max, 5),
-                                                                      round(util_min, 5), round(util_avg, 5),
-                                                                      round(util_max, 5)))
+                                                                        round(power_avg, 5), round(power_max, 5),
+                                                                        round(util_min, 5), round(util_avg, 5),
+                                                                        round(util_max, 5)))
