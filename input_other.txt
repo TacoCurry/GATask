@@ -1,0 +1,18 @@
+100000
+100
+10000
+0.2
+0.5
+0.001
+4
+100 0
+
+# 첫 번째 줄부터 순서대로
+# Max Generations
+# populations
+# TRY_LIMIT
+# UTIL_LIMIT_RATIO
+# PENALTY_RATIO
+# MUTATION_PROB, 돌연변이 발생 확률
+# Roulette-wheel selection 에서 사용하는 상수 k
+# ranking selection 에서 사용하는 MAX, MIN
