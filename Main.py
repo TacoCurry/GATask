@@ -51,6 +51,7 @@ def run():
     # 5. Print result
     for solution in solutions:
         if solution.is_schedule():
+            print("power: {}, utilization: {}".format(solution.power, solution.utilization))
             OutputUtils.result_print(solution)
             break
 
