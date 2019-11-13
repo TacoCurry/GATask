@@ -9,6 +9,9 @@ def run():
     Solution.tasks = InputUtils.get_tasks()
     InputUtils.get_other_input()
 
+    # Initiate report.txt
+    OutputUtils.init_report()
+
     # 1. Make initial solution set
     Solution.set_random_seed()
     solutions = [Solution.get_random_solution() for i in range(Solution.POPULATIONS)]
