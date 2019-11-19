@@ -1,6 +1,6 @@
 2
-dram  1000 1   0.1   0.1
-lpm   1000 0.5 0.1  0.01
+dram  1000 1   0.01   0.01
+lpm   1000 0.5 0.01  0.001
 
 # num of memory type
 # type max_capacity wcet_scale power_active power_idle
