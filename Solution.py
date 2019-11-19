@@ -112,6 +112,9 @@ class Solution:
             wcet_scaled_processor = 1 / processor_mode.wcet_scale
             wcet_scaled_memory = 1 / memory.wcet_scale
             det = task.wcet * max(wcet_scaled_memory, wcet_scaled_processor)
+            det = int(round(det))
+            if det == 0:
+                det = 1
 
             if det > task.period:
                 return False  # deadline ncc
