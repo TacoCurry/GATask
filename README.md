@@ -16,3 +16,5 @@ This program assigns h/w resources for a task using GA to optimize power
 각 줄마다 input_tasks의 task에 하나씩 대응하며, 프로세서의 voltage/frequency 모드와 메모리 종류 순으로 출력된다.
 
 ## Demo
+GA Demo: 10000세대 진화 결과
+https://youtu.be/aSAMVM6kDyg
